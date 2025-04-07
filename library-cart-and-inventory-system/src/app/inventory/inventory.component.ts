@@ -20,7 +20,7 @@ export class InventoryComponent implements OnInit {
       imageUrl:
         'https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=100',
       price: 29.99,
-      inventory: 5,
+      inventory: 4,
     },
     {
       id: 2,
@@ -48,18 +48,27 @@ export class InventoryComponent implements OnInit {
     this.updateBookCovers();
   }
 
+  /**
+   * Updates the book covers by making a request to the Google Books API
+   * for each book in the inventory. If a valid image link is found,
+   * updates the book's imageUrl property with that link.
+   */
   updateBookCovers() {
+    // Iterate over each book in the inventory
     this.books.forEach((book) => {
-
+      // Construct the query string using book title and author
       const query = `${book.title} ${book.author}`;
+
+      // Construct the Google Books API request URL
       const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}`;
 
+      // Make an HTTP GET request to the Google Books API
       this.http.get(url).subscribe((data: any) => {
-        
+        // Check if response contains a valid thumbnail image link
         if (data.items && data.items[0]?.volumeInfo?.imageLinks?.thumbnail) {
+          // Update the book's imageUrl with the retrieved thumbnail link
           book.imageUrl = data.items[0].volumeInfo.imageLinks.thumbnail;
         }
-
       });
     });
   }

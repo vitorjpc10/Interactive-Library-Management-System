@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+
 import { InventoryComponent } from './inventory/inventory.component';
 
 @Component({
@@ -12,4 +13,4 @@ import { InventoryComponent } from './inventory/inventory.component';
 
 export class AppComponent {
   title = 'Library Cart and Inventory System';
-} 
+}
