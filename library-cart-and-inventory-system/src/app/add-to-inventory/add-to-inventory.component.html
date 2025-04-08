@@ -1,0 +1,18 @@
+<div class="scanner-container">
+  <button (click)="startScan()" *ngIf="!scanning">📷 Start Scanning</button>
+  <button (click)="stopScan()" *ngIf="scanning">🛑 Stop</button>
+
+  <div class="video-wrapper" *ngIf="scanning">
+    <video id="video" width="100%" autoplay muted></video>
+  </div>
+
+  <p class="message">{{ resultMessage }}</p>
+
+  <div class="results" *ngIf="scannedBooks.length > 0">
+    <h3>📚 Scanned ISBNs</h3>
+    <div class="book-card" *ngFor="let isbn of scannedBooks">
+      <p><strong>ISBN:</strong> {{ isbn }}</p>
+    </div>
+  </div>
+</div>
+
