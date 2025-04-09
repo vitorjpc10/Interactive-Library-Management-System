@@ -46,7 +46,7 @@ export class AddToInventoryComponent implements OnDestroy {
       //! Adicionar um log e <p> para mostrar qual camera vai ser usada
 
       //! Talvez pedir para o usuario selecionar qual camera ele deseja usar
-      const selectedDeviceId = devices[3]?.deviceId;
+      const selectedDeviceId = devices[0]?.deviceId;
       if (!selectedDeviceId) {
         throw new Error('No camera device ID available');
       }
