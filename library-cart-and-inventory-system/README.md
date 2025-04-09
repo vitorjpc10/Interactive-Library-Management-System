@@ -89,7 +89,12 @@ To test the application (including barcode scanning) on a mobile device:
 
 1. Start the server with host configuration:
 ```bash
-ng serve --host 0.0.0.0
+ng serve --host 0.0.0.0 --port 4200 --disable-host-check
+```
+
+and create tunnel if necessary
+```bash
+ngrok http --url=maximum-marten-allegedly.ngrok-free.app 4200
 ```
 
 2. Find your computer's IP address:

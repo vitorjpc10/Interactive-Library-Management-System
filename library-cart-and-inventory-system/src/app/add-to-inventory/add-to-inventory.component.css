@@ -1,49 +1,32 @@
-.scanner-container {
+/* Add these styles to your existing CSS */
+.camera-select {
+  margin-bottom: 1rem;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 1rem;
-  padding: 1rem;
+  gap: 0.5rem;
 }
 
-.video-wrapper {
-  border: 2px solid #ccc;
-  border-radius: 8px;
-  overflow: hidden;
-  width: 100%;
-  max-width: 480px;
+.camera-select label {
+  font-weight: bold;
 }
 
-button {
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-  cursor: pointer;
-  border: none;
-  border-radius: 8px;
-  background-color: #007bff;
-  color: white;
-  transition: background-color 0.2s;
+.camera-select select {
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background-color: white;
+  min-width: 200px;
 }
 
-button:hover {
-  background-color: #0056b3;
+.camera-select select:disabled {
+  background-color: #f0f0f0;
+  cursor: not-allowed;
 }
 
-.message {
-  font-size: 1rem;
-  color: #333;
-  font-style: italic;
-}
-
-.results {
-  width: 100%;
-  max-width: 480px;
-}
-
-.book-card {
-  background: #f9f9f9;
-  border-left: 5px solid #007bff;
-  padding: 1rem;
+.camera-info {
   margin: 0.5rem 0;
-  border-radius: 5px;
+  padding: 0.5rem;
+  background-color: #e8f5e9;
+  border-radius: 4px;
+  color: #2e7d32;
 }

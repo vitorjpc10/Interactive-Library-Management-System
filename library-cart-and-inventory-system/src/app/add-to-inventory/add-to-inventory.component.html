@@ -1,18 +1,45 @@
 <div class="scanner-container">
-  <button (click)="startScan()" *ngIf="!scanning">📷 Start Scanning</button>
-  <button (click)="stopScan()" *ngIf="scanning">🛑 Stop</button>
+  <h1>Add to Inventory Scan Functionality</h1>
+  <div class="controls">
+    <!-- Camera selection dropdown -->
+    <div class="camera-select" *ngIf="availableVideoDevices.length > 1">
+      <label for="cameraSelect">Select Camera:</label>
+      <select
+        id="cameraSelect"
+        [ngModel]="selectedDeviceId"
+        (ngModelChange)="onCameraChange($event)"
+        [disabled]="scanning">
+        <option *ngFor="let device of availableVideoDevices" [value]="device.deviceId">
+          {{ device.label }}
+        </option>
+      </select>
+    </div>
 
-  <div class="video-wrapper" *ngIf="scanning">
-    <video id="video" width="100%" autoplay muted></video>
+    <button (click)="startScan()" [disabled]="scanning">Start Scanning</button>
+    <button (click)="stopScan()" [disabled]="!scanning">Stop Scanning</button>
   </div>
 
-  <p class="message">{{ resultMessage }}</p>
+  <!-- Current camera display -->
+  <p class="camera-info" *ngIf="currentDeviceLabel">
+    Current camera: {{ currentDeviceLabel }}
+  </p>
 
-  <div class="results" *ngIf="scannedBooks.length > 0">
-    <h3>📚 Scanned ISBNs</h3>
-    <div class="book-card" *ngFor="let isbn of scannedBooks">
-      <p><strong>ISBN:</strong> {{ isbn }}</p>
+  <div class="video-container" *ngIf="scanning">
+    <video id="video" playsinline></video>
+  </div>
+
+  <div class="results">
+    <p class="message" [class.error]="resultMessage.includes('❌')"
+                      [class.warning]="resultMessage.includes('⚠️')"
+                      [class.success]="resultMessage.includes('✅')">
+      {{ resultMessage }}
+    </p>
+
+    <div class="scanned-books" *ngIf="scannedBooks.length > 0">
+      <h3>Scanned Books:</h3>
+      <ul>
+        <li *ngFor="let isbn of scannedBooks">{{ isbn }}</li>
+      </ul>
     </div>
   </div>
 </div>
-
