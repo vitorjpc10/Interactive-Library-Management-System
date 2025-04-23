@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { BrowserMultiFormatReader, BrowserCodeReader } from '@zxing/browser';
-import { FormsModule } from '@angular/forms';
+import {Component} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {BrowserMultiFormatReader, BrowserCodeReader} from '@zxing/browser';
+import {FormsModule} from '@angular/forms';
 
 @Component({
   selector: 'app-add-to-inventory',
@@ -21,6 +21,8 @@ export class AddToInventoryComponent {
   availableVideoDevices: any [] = [];
   selectedDeviceId: string = '';
   currentDeviceLabel: string = '';
+
+  lastMessages: string[] = []
 
   /**
    * Initiates the scanning process using the camera. This function attempts to access
@@ -48,7 +50,13 @@ export class AddToInventoryComponent {
       }
 
       // Request camera permission first
-      await navigator.mediaDevices.getUserMedia({ video: true });
+      await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: 'environment',
+          frameRate: { ideal: 30, max: 60 },
+          autoGainControl: true
+        }
+      });
 
       // Get available camera devices
       const listAvailableVideoDevices = await BrowserCodeReader.listVideoInputDevices();
@@ -91,7 +99,7 @@ export class AddToInventoryComponent {
           try {
             // Attempt to start the camera stream with the given deviceId
             const stream = await navigator.mediaDevices.getUserMedia({
-              video: { deviceId: { exact: deviceId } }
+              video: {deviceId: {exact: deviceId}}
             });
 
             // Stop the camera stream after testing
@@ -132,20 +140,38 @@ export class AddToInventoryComponent {
         this.selectedDeviceId,
         'video',
         (result, error) => {
+
+
           if (result) {
             const isbn = result.getText();
+            const isbnRegex = /^\d{13}$/; // matches 13-digit ISBN
 
-            // Check if the ISBN is already scanned
-            if (!this.scannedBooks.includes(isbn)) {
-              this.scannedBooks.push(isbn); // Add new ISBN to the list
-              this.resultMessage = `✅ Scan successful: ${isbn}`;
+            if (isbnRegex.test(isbn)) {
+              // Check if the ISBN is already scanned
+              if (!this.scannedBooks.includes(isbn)) {
+                this.scannedBooks.push(isbn); // Add new ISBN to the list
+                this.resultMessage = `✅ Scan successful: ${isbn}`;
+              } else {
+                this.resultMessage = `⚠️ ISBN ${isbn} already scanned.`;
+              }
             } else {
-              this.resultMessage = `⚠️ ISBN ${isbn} already scanned.`;
+              this.resultMessage = `❌ Error: "${isbn}" is not a valid ISBN value.`;
             }
           }
           // Handle scanning errors
           if (error && !error.message.includes('NotFoundException')) {
             this.resultMessage = `❌ Scanning error: ${error.message}`;
+          }
+
+          // Check if the current message is not the same as any of the last three messages
+          if (!this.lastMessages.slice(-3).includes(this.resultMessage)) {
+            // Add the new message to the array
+            this.lastMessages.push(this.resultMessage);
+
+            // Limit the array to the last three messages
+            if (this.lastMessages.length > 3) {
+              this.lastMessages.shift();
+            }
           }
         }
       );
@@ -195,7 +221,7 @@ export class AddToInventoryComponent {
   }
 
   //! Need to introduce logic for the values of the scannedBooks to hit the google api and retrieve the data given that ISBN
-  //! 1. logic to ignore Scanned IDs that are not ISBN (create a ISBN Validator before hitting the API)
+  //! 1. reorder thee lastMessages so the most recent message is at the top, not at the bottom
   //! 2. Error handling for the API call if ISBN is not found, create a page overlay for manual entry
 
   // Clean up resources when component is destroyed

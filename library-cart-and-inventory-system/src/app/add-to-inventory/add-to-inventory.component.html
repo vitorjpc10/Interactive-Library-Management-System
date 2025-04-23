@@ -29,11 +29,15 @@
   </div>
 
   <div class="results">
-    <p class="message" [class.error]="resultMessage.includes('❌')"
-                      [class.warning]="resultMessage.includes('⚠️')"
-                      [class.success]="resultMessage.includes('✅')">
-      {{ resultMessage }}
-    </p>
+    <div class="messages">
+      <ng-container *ngFor="let message of lastMessages; let i = index">
+        <p [class.error]="message.includes('❌')"
+           [class.warning]="message.includes('⚠️')"
+           [class.success]="message.includes('✅')">
+          {{ message }}
+        </p>
+      </ng-container>
+    </div>
 
     <div class="scanned-books" *ngIf="scannedBooks.length > 0">
       <h3>Scanned Books:</h3>

@@ -46,7 +46,6 @@ export class InventoryComponent implements OnInit {
 
   ngOnInit() {
     //! Probably add a function here to reach out to database and retrieve all books information and then update the instance variable books array first
-
     //! Then run this function to update the book covers
     this.updateBookCovers();
   }
