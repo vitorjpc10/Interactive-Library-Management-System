@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { Book } from '../models/book.interface';
+import {Component, OnInit} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {HttpClient, HttpClientModule} from '@angular/common/http';
+import {Book} from '../models/book.interface';
 
 @Component({
   selector: 'app-inventory',
@@ -15,6 +15,7 @@ export class InventoryComponent implements OnInit {
   books: Book[] = [
     {
       id: 1,
+      isbn: 'UNKNOWN',
       title: 'The Great Gatsby',
       author: 'F. Scott Fitzgerald',
       imageUrl:
@@ -24,6 +25,7 @@ export class InventoryComponent implements OnInit {
     },
     {
       id: 2,
+      isbn: 'UNKNOWN',
       title: '1984',
       author: 'George Orwell',
       imageUrl:
@@ -33,6 +35,7 @@ export class InventoryComponent implements OnInit {
     },
     {
       id: 3,
+      isbn: 'UNKNOWN',
       title: 'To Kill a Mockingbird',
       author: 'Harper Lee',
       imageUrl:
@@ -42,7 +45,8 @@ export class InventoryComponent implements OnInit {
     },
   ];
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+  }
 
   ngOnInit() {
     //! Probably add a function here to reach out to database and retrieve all books information and then update the instance variable books array first
@@ -59,23 +63,23 @@ export class InventoryComponent implements OnInit {
     // Iterate over each book in the inventory
     this.books.forEach((book) => {
       // Construct the query string using book title and author
-      const query = `${book.title} ${book.author}`;
+      const query = `intitle:${book.title} inauthor:${book.author}`;
 
       // Construct the Google Books API request URL
-      const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}`;
+      const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=20`;
 
       // Make an HTTP GET request to the Google Books API
       this.http.get(url).subscribe((data: any) => {
-        // Check if response contains a valid thumbnail image link
-        if (data.items && data.items[0]?.volumeInfo?.imageLinks?.thumbnail) {
-          // Update the book's imageUrl with the retrieved thumbnail link
-          book.imageUrl = data.items[0].volumeInfo.imageLinks.thumbnail;
+        // Check if response contains a valid image link
+        if (data.items && data.items[0]?.volumeInfo?.imageLinks) {
+          const imageUrl = data.items[0].volumeInfo.imageLinks.thumbnail ||
+            data.items[0].volumeInfo.imageLinks.smallThumbnail ||
+            data.items[0].volumeInfo.imageLinks.mediumThumbnail;
+          book.imageUrl = imageUrl;
+        } else {
+          book.imageUrl = 'https://example.com/default-book-cover.jpg';
         }
       });
     });
   }
 }
-
-
-// SEE how to 1. run and debug a file
-// 2. how to implement this http request to the google library to retrieve the file book image url

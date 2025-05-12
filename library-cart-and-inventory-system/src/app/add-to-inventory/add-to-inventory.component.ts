@@ -1,7 +1,11 @@
-import {Component} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {BrowserMultiFormatReader, BrowserCodeReader} from '@zxing/browser';
 import {FormsModule} from '@angular/forms';
+import {HttpClient} from '@angular/common/http';
+import {Book} from '../models/book.interface';
+import {Observable} from 'rxjs';
+import {map} from 'rxjs/operators';
 
 @Component({
   selector: 'app-add-to-inventory',
@@ -10,10 +14,10 @@ import {FormsModule} from '@angular/forms';
   imports: [CommonModule, FormsModule],
   standalone: true
 })
-export class AddToInventoryComponent {
+export class AddToInventoryComponent implements OnDestroy {
   scanning = false;
   resultMessage: string = '';
-  scannedBooks: string[] = [];
+  scannedISBN: string[] = [];
   scanner: BrowserMultiFormatReader | null = null;
   videoInputDevice: any = null;
 
@@ -23,6 +27,10 @@ export class AddToInventoryComponent {
   currentDeviceLabel: string = '';
 
   lastMessages: string[] = []
+
+  bookSelection: Book[] = []
+
+  constructor(private http: HttpClient) { }
 
   /**
    * Initiates the scanning process using the camera. This function attempts to access
@@ -38,7 +46,7 @@ export class AddToInventoryComponent {
    */
   async startScan() {
     this.resultMessage = ''; // Clear previous result messages
-    this.scannedBooks = []; // Reset the scanned books list
+    this.scannedISBN = []; // Reset the scanned books list
     this.scanning = true; // Set scanning state to true
 
     this.scanner = new BrowserMultiFormatReader(); // Initialize the scanner
@@ -53,7 +61,7 @@ export class AddToInventoryComponent {
       await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: 'environment',
-          frameRate: { ideal: 30, max: 60 },
+          frameRate: {ideal: 30, max: 60},
           autoGainControl: true
         }
       });
@@ -148,12 +156,17 @@ export class AddToInventoryComponent {
 
             if (isbnRegex.test(isbn)) {
               // Check if the ISBN is already scanned
-              if (!this.scannedBooks.includes(isbn)) {
-                this.scannedBooks.push(isbn); // Add new ISBN to the list
+              if (!this.scannedISBN.includes(isbn)) {
+                this.scannedISBN.push(isbn); // Add new ISBN to the list
                 this.resultMessage = `✅ Scan successful: ${isbn}`;
+
+                this.getBookInfoFromISBN(isbn).subscribe(book => {
+                  this.bookSelection.push(book);
+                });
               } else {
                 this.resultMessage = `⚠️ ISBN ${isbn} already scanned.`;
               }
+
             } else {
               this.resultMessage = `❌ Error: "${isbn}" is not a valid ISBN value.`;
             }
@@ -220,14 +233,43 @@ export class AddToInventoryComponent {
     }
   }
 
-  //! Need to introduce logic for the values of the scannedBooks to hit the google api and retrieve the data given that ISBN
-  //! 1. reorder thee lastMessages so the most recent message is at the top, not at the bottom
-  //! 2. Error handling for the API call if ISBN is not found, create a page overlay for manual entry
+  getBookInfoFromISBN(isbn: string): Observable<Book> {
+    const url = `https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}`;
+
+    return this.http.get(url).pipe(
+      map((data: any) => {
+
+        const defaultBook: Book = {
+          id: 0,
+          isbn,
+          title: 'Untitled',
+          author: 'Unknown Author',
+          imageUrl: 'assets/default-book.jpg',
+          price: 0,
+          inventory: 0
+        };
+
+        if (data.items?.[0]) {
+          const book = data.items[0].volumeInfo;
+          return {
+            id: 0,
+            isbn,
+            title: book.title || 'Untitled',
+            author: book.authors?.join(', ') || 'Unknown Author',
+            imageUrl: book.imageLinks?.thumbnail || 'assets/default-book.jpg',
+            price: 0,
+            inventory: 0
+          };
+        }
+
+        // If no valid book data is found, return the default book with isbn number
+        return defaultBook;
+      })
+    );
+  }
 
   // Clean up resources when component is destroyed
   ngOnDestroy() {
     this.stopScan();
   }
 }
-
-

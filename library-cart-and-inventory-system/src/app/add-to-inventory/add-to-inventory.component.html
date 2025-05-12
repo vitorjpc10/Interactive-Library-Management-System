@@ -30,7 +30,7 @@
 
   <div class="results">
     <div class="messages">
-      <ng-container *ngFor="let message of lastMessages; let i = index">
+      <ng-container *ngFor="let message of lastMessages.slice().reverse(); let i = index">
         <p [class.error]="message.includes('❌')"
            [class.warning]="message.includes('⚠️')"
            [class.success]="message.includes('✅')">
@@ -39,11 +39,31 @@
       </ng-container>
     </div>
 
-    <div class="scanned-books" *ngIf="scannedBooks.length > 0">
+    <div class="scanned-books" *ngIf="scannedISBN.length > 0">
       <h3>Scanned Books:</h3>
       <ul>
-        <li *ngFor="let isbn of scannedBooks">{{ isbn }}</li>
+        <li *ngFor="let isbn of scannedISBN">{{ isbn }}</li>
       </ul>
     </div>
+  </div>
+
+  <div class="scanned-books-list-data">
+    <h2>Scanned Books</h2>
+    <ul class="book-list">
+      <li *ngFor="let book of bookSelection" class="book-item">
+        <img [src]="book.imageUrl" [alt]="book.title" class="book-cover">
+        <div class="book-main-info">
+          <h3 class="book-title">{{ book.title }}</h3>
+          <p class="book-author">by {{ book.author }}</p>
+        </div>
+        <div class="book-meta">
+          <p class="book-isbn">ISBN: {{ book.isbn }}</p>
+        </div>
+        <div class="book-financial">
+          <p class="book-price">${{ book.price.toFixed(2) }}</p>
+          <p class="book-inventory">Qty: {{ book.inventory }}</p>
+        </div>
+      </li>
+    </ul>
   </div>
 </div>
