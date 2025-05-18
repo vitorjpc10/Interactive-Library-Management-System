@@ -12,46 +12,40 @@ import {Book} from '../models/book.interface';
 })
 
 export class InventoryComponent implements OnInit {
-  books: Book[] = [
-    {
-      id: 1,
-      isbn: 'UNKNOWN',
-      title: 'The Great Gatsby',
-      author: 'F. Scott Fitzgerald',
-      imageUrl:
-        'https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=100',
-      price: 29.99,
-      inventory: 4,
-    },
-    {
-      id: 2,
-      isbn: 'UNKNOWN',
-      title: '1984',
-      author: 'George Orwell',
-      imageUrl:
-        'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?q=80&w=100',
-      price: 24.99,
-      inventory: 3,
-    },
-    {
-      id: 3,
-      isbn: 'UNKNOWN',
-      title: 'To Kill a Mockingbird',
-      author: 'Harper Lee',
-      imageUrl:
-        'https://images.unsplash.com/photo-1541963463532-d68292c34b19?q=80&w=100',
-      price: 19.99,
-      inventory: 8,
-    },
-  ];
+
+
+
+  books: Book[] = [];
 
   constructor(private http: HttpClient) {
   }
 
-  ngOnInit() {
-    //! Probably add a function here to reach out to database and retrieve all books information and then update the instance variable books array first
-    //! Then run this function to update the book covers
-    this.updateBookCovers();
+  async ngOnInit() {
+    try {
+      await this.fetchBooks();
+      this.updateBookCovers();
+    } catch (error) {
+      console.error('Error initializing inventory:', error);
+    }
+  }
+
+  async fetchBooks(): Promise<Book[]> {
+    try {
+      const response = await this.http.get<Book[]>('http://localhost:8080/api/books').toPromise();
+
+      if (!response) {
+        throw new Error('API returned empty response');
+      }
+
+      // The API response already matches our Book interface, so we can directly assign it
+      this.books = response;
+      return this.books;
+
+    } catch (error) {
+      const errorMessage = `Failed to fetch books from http://localhost:8080/api/books. ` +
+        `Error: ${error instanceof Error ? error.message : String(error)}`;
+      throw new Error(errorMessage);
+    }
   }
 
   /**
